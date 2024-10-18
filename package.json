@@ -1,0 +1,39 @@
+{
+  "name": "gutenberg-wall",
+  "version": "1.0.0",
+  "description": "Gutenberg Wall",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -b",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/varqasim/gutenberg-wall.git"
+  },
+  "author": "Qasim Albaqali",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/varqasim/gutenberg-wall/issues"
+  },
+  "homepage": "https://github.com/varqasim/gutenberg-wall#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.674.0",
+    "axios": "^1.7.7",
+    "fastify": "^5.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@types/node": "^22.7.6",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.10.0",
+    "eslint": "^9.13.0",
+    "globals": "^15.11.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.10.0"
+  }
+}
