@@ -2,11 +2,12 @@
   "name": "gutenberg-wall",
   "version": "1.0.0",
   "description": "Gutenberg Wall",
-  "main": "index.js",
+  "main": "src/dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "build": "tsc -b",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register src/server.ts'"
   },
   "repository": {
     "type": "git",
@@ -19,21 +20,33 @@
   },
   "homepage": "https://github.com/varqasim/gutenberg-wall#readme",
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.675.0",
     "@aws-sdk/client-s3": "^3.674.0",
+    "@fastify/cors": "^10.0.1",
+    "aws-jwt-verify": "^4.0.1",
     "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.35.2",
     "fastify": "^5.0.0",
+    "pg": "^8.13.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@faker-js/faker": "^9.0.3",
     "@types/node": "^22.7.6",
+    "@types/pg": "^8.11.10",
     "@typescript-eslint/eslint-plugin": "^8.10.0",
     "@typescript-eslint/parser": "^8.10.0",
+    "drizzle-kit": "^0.26.2",
     "eslint": "^9.13.0",
-    "globals": "^15.11.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.10.0"
+    "typescript-eslint": "^8.10.0",
+    "vitest": "^2.1.3"
   }
 }

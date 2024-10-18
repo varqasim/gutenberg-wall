@@ -5,7 +5,7 @@ export default class GutenbergService {
   constructor(
     private readonly apiClient: Axios
   ) {
-    this.apiClient.defaults.baseURL = process.env.GUTENBERG_BASE_PATH ?? 'https://www.gutenberg.org';
+    this.apiClient.defaults.baseURL = process.env.GUTENBERG_BASE_PATH ?? 'https://gutenberg.org';
   }
 
   async getBook(bookId: string): Promise<Book> {
