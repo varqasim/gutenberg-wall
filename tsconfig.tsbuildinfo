@@ -1,0 +1,1 @@
+{"root":["./src/books/book.ts","./src/books/bookmetadata.ts","./src/books/bookrepository.ts","./src/books/usercontroller.ts","./src/books/gutebergservice/gutenbergservice.ts","./src/books/gutebergservice/index.ts","./src/user/cognitoservice.ts","./src/user/user.ts","./src/user/userrepository.ts","./src/utils/httpclient.ts"],"version":"5.6.3"}
