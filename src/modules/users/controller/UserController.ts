@@ -1,10 +1,10 @@
 import { User } from "../User";
 import { CognitoService } from "../CognitoService";
 import { UserRepository } from "../database/UserRepository";
-import { SignUpReq, SignUpReqSchema } from "./schema";
+import { CreateUserProfileReq, CreateUserProfileSchema } from "./schema";
 import { UserMapper } from "../Mapper";
 import { UserErrors } from "./UserErrors";
-import { ZodError, ZodIssue } from "zod";
+import { ZodIssue } from "zod";
 
 export class UserController {
   constructor(
@@ -12,18 +12,19 @@ export class UserController {
     private readonly userRepository: UserRepository
   ) {}
 
-  async signUp(req: SignUpReq): Promise<User> {
+  async createUserProfile(req: CreateUserProfileReq): Promise<User> {
     try {
-      SignUpReqSchema.parse(req);
+      CreateUserProfileSchema.parse(req);
     } catch (error) {
       throw new UserErrors.ValidationError((error as unknown as ZodIssue).message, error as Error);
     }
 
     try {
-      const cognitoUser = await this.cognitoService.createUser(
-        req.name,
-        req.email
-      );
+      const cognitoUser = await this.cognitoService.getUserById(req.id);
+
+      if (!cognitoUser) {
+        throw new Error("User not found");
+      }
 
       const user = new User(
         cognitoUser.id,
@@ -40,7 +41,7 @@ export class UserController {
     }
   }
 
-  async getUser(id: string): Promise<User | undefined> {
+  async getUserProfile(id: string): Promise<User | undefined> {
     const user = await this.userRepository.findOneById(id);
 
     if (!user) {

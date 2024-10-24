@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 
-import { getUserRoute, signUpRoute } from "./modules/users/routes";
+import { getUserRoute, createProfileRoute } from "./modules/users/routes";
 import { withAuthorizer } from "./libs/middleware/withAuthorizer";
 
 dotenv.config({
@@ -27,7 +27,7 @@ fastify.register(cors, {
   },
 });
 
-fastify.post("/v1/users", signUpRoute);
+fastify.post("/v1/users", createProfileRoute);
 fastify.get("/v1/users", { preHandler: withAuthorizer }, getUserRoute);
 
 (async () => {

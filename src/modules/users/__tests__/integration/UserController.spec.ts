@@ -1,15 +1,12 @@
 import { beforeAll, describe, it, expect } from "vitest";
 
 import { faker } from "@faker-js/faker";
-import {
-  CognitoIdentityProviderClient,
-  GetUserRequest,
-} from "@aws-sdk/client-cognito-identity-provider";
+import { CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
 
 import { UserController } from "../../controller/UserController";
 import { CognitoService } from "../../CognitoService";
 import { UserRepository } from "../../database/UserRepository";
-import { SignUpReq } from "../../controller/schema";
+import { CreateUserProfileReq } from "../../controller/schema";
 import { User } from "../../User";
 import { randomUUID } from "crypto";
 
@@ -22,8 +19,6 @@ describe("UserController", () => {
 
   beforeAll(() => {
     cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
-      endpoint:
-        process.env.ENVIRONMENT === "dev" ? "http://localhost:4566" : undefined,
       region: process.env.AWS_REGION || "us-east-1",
     });
     cognitoService = new CognitoService(cognitoIdentityProviderClient);
@@ -36,41 +31,67 @@ describe("UserController", () => {
     it("should throw ValidationError when the request argument is invalid", async () => {
       const req = { name: faker.person.firstName() };
 
-      await expect(userController.signUp(req as SignUpReq)).rejects.toThrow(
-        "Validation Error"
-      );
+      await expect(
+        userController.createUserProfile(req as CreateUserProfileReq)
+      ).rejects.toThrow("Validation Error");
     });
 
-    it("should get the user if it already exists on sign up", async () => {
-      const userInfo = { name: faker.person.firstName(), email: faker.internet.email() };
-      const existingCognitoUser = await cognitoService.createUser(userInfo.name, userInfo.email);
-
-      const response = await userController.signUp({ name: userInfo.name, email: userInfo.email });
-      
-      expect(response).toMatchObject({
-        id: existingCognitoUser.id,
-        name: existingCognitoUser.name,
-        email: existingCognitoUser.email
-      });
-    });
-
-    it("should create a cognito user & store the user in the database", async () => {
-      const req: SignUpReq = {
+    it("should throw an error if a non existing cognito exists for the user", async () => {
+      const userInfo = {
         name: faker.person.firstName(),
         email: faker.internet.email(),
       };
 
-      const response = await userController.signUp(req);
+      await expect(
+        userController.createUserProfile({
+          id: randomUUID(),
+          name: userInfo.name,
+          email: userInfo.email,
+        })
+      ).toThrow();
+    });
 
-      const cognitoUser = await cognitoService.getUserByEmail(req.email);
-      expect(cognitoUser).toEqual({
-        id: expect.any(String),
-        name: req.name,
-        email: req.email,
+    it("should get the user if it already exists on sign up", async () => {
+      // Arrange
+      const userInfo = {
+        name: faker.person.firstName(),
+        email: faker.internet.email(),
+      };
+      const existingCognitoUser = await cognitoService.createUser(
+        userInfo.name,
+        userInfo.email
+      );
+
+      // Act
+      const response = await userController.createUserProfile({
+        id: existingCognitoUser.id,
+        name: userInfo.name,
+        email: userInfo.email,
       });
 
+      // Assert
       expect(response).toMatchObject({
-        id: cognitoUser?.id,
+        id: existingCognitoUser.id,
+        name: existingCognitoUser.name,
+        email: existingCognitoUser.email,
+      });
+    });
+
+    it("should create a user profile and store it in the database", async () => {
+      // Arrange
+      const cognitoUser = await cognitoService.createUser(faker.person.firstName(), faker.internet.email());
+      const req: CreateUserProfileReq = {
+        id: cognitoUser.id,
+        name: faker.person.firstName(),
+        email: faker.internet.email(),
+      };
+
+      // Act
+      const response = await userController.createUserProfile(req);
+
+      // Assert
+      expect(response).toMatchObject({
+        id: cognitoUser.id,
         name: req.name,
         email: req.email,
       });
@@ -79,8 +100,7 @@ describe("UserController", () => {
 
   describe("Get User", () => {
     it("should return undefined if the user does not exists", async () => {
-      const response = await userController.getUser(randomUUID());
-
+      const response = await userController.getUserProfile(randomUUID());
       expect(response).toBeUndefined();
     });
 
@@ -92,7 +112,7 @@ describe("UserController", () => {
       );
       await userRepository.create(user);
 
-      const response = await userController.getUser(user.id);
+      const response = await userController.getUserProfile(user.id);
 
       expect(response).toMatchObject({
         id: user.id,

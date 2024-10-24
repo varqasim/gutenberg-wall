@@ -59,6 +59,31 @@ export class CognitoService {
     };
   }
 
+  async getUserById(cognitoUserId: string): Promise<CognitoUser | undefined> {
+    try {
+      const getUserCommand = new AdminGetUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: cognitoUserId,
+      });
+      const getUserResponse = await this.cognitoClient.send(getUserCommand);
+      
+    const userAttributes = getUserResponse.UserAttributes || [];
+    return {
+      id: getUserResponse.Username!,
+      name: userAttributes!.find((attr) => attr.Name === "name")?.Value || "",
+      email: userAttributes!.find((attr) => attr.Name === "email")?.Value || "",
+    };
+
+    } catch (error) {
+      if ((error instanceof UserNotFoundException)) {
+        return undefined;
+      }
+
+      console.error(error);
+      throw new Error('Error!');
+    }
+  }
+
   async getUserByEmail(email: string): Promise<CognitoUser | undefined> {
     try {
       const getUserCommand = new AdminGetUserCommand({

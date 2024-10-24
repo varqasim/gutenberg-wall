@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-export const SignUpReqSchema = z.object({
+export const CreateUserProfileSchema = z.object({
+  id: z.string(),
   name: z.string(),
   email: z.string().email()
 });
 
-export type SignUpReq = z.infer<typeof SignUpReqSchema>;
+export type CreateUserProfileReq = z.infer<typeof CreateUserProfileSchema>;
