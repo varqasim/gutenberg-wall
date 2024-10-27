@@ -47,7 +47,7 @@ export class CognitoService {
         { Name: "email_verified", Value: "true" },
         { Name: "name", Value: name },
       ],
-      TemporaryPassword: randomUUID(),
+      TemporaryPassword: this.generateRandomPassword(),
     });
 
     const createUserResponse = await this.cognitoClient.send(command);
@@ -107,5 +107,25 @@ export class CognitoService {
       console.error(error);
       throw new Error('Error!');
     }
+  }
+
+  private generateRandomPassword() {
+    const length = 10;
+    const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+    const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    const numbers = '0123456789';
+    
+    // Start with required characters to meet all criteria
+    let result = upperCase[Math.floor(Math.random() * upperCase.length)];     // Uppercase
+    result += specialChars[Math.floor(Math.random() * specialChars.length)];  // Special char
+    result += numbers[Math.floor(Math.random() * numbers.length)];            // Number
+    
+    // Fill rest with random lowercase letters
+    for (let i = 0; i < length - 3; i++) {
+      result += lowerCase[Math.floor(Math.random() * lowerCase.length)];
+    }
+    
+    return result;
   }
 }

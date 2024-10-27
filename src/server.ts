@@ -4,31 +4,27 @@ import cors from "@fastify/cors";
 
 import { getUserRoute, createProfileRoute } from "./modules/users/routes";
 import { withAuthorizer } from "./libs/middleware/withAuthorizer";
+import { getBookByIdRoute } from "./modules/books/routes";
 
 dotenv.config({
   path: process.env.ENVIRONMENT === "prod" ? ".env" : ".env.dev",
 });
 
 export const fastify = Fastify({
-  logger: true,
+  logger: false,
 });
 
 fastify.register(cors, {
   origin: (origin, callback) => {
-    const hostname = new URL(origin!).hostname;
-
-    if (hostname === "localhost") {
-      //  Request from localhost will pass
-      callback(null, true);
-      return;
-    }
-    // Generate an error on other origins, disabling access
-    callback(new Error("Not allowed"), false);
+    callback(null, true)
   },
 });
 
 fastify.post("/v1/users", createProfileRoute);
 fastify.get("/v1/users", { preHandler: withAuthorizer }, getUserRoute);
+// fastify.get("/v1/books", { preHandler: withAuthorizer }, getUserRoute);
+fastify.get("/v1/books/:bookId", getBookByIdRoute);
+// fastify.post("/v1/books", { preHandler: withAuthorizer }, getUserRoute);
 
 (async () => {
   try {

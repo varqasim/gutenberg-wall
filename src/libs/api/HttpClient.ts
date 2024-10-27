@@ -1,4 +1,4 @@
-import { Axios } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 
-export const httpClient = new Axios();
+export const httpClient: AxiosInstance = axios.create();
 

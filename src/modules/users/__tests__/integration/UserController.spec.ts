@@ -9,6 +9,7 @@ import { UserRepository } from "../../database/UserRepository";
 import { CreateUserProfileReq } from "../../controller/schema";
 import { User } from "../../User";
 import { randomUUID } from "crypto";
+import { UserErrors } from "../../controller/UserErrors";
 
 describe("UserController", () => {
   let cognitoIdentityProviderClient: CognitoIdentityProviderClient;
@@ -29,11 +30,11 @@ describe("UserController", () => {
 
   describe("Sign Up", () => {
     it("should throw ValidationError when the request argument is invalid", async () => {
-      const req = { name: faker.person.firstName() };
+      const req = { /*id: randomUUID(),*/ name: faker.person.firstName(), email: faker.internet.email() };
 
       await expect(
         userController.createUserProfile(req as CreateUserProfileReq)
-      ).rejects.toThrow("Validation Error");
+      ).rejects.toThrow(UserErrors.ValidationError);
     });
 
     it("should throw an error if a non existing cognito exists for the user", async () => {
@@ -48,7 +49,7 @@ describe("UserController", () => {
           name: userInfo.name,
           email: userInfo.email,
         })
-      ).toThrow();
+      ).rejects.toThrow(UserErrors.UserNotFoundError);
     });
 
     it("should get the user if it already exists on sign up", async () => {
@@ -82,8 +83,8 @@ describe("UserController", () => {
       const cognitoUser = await cognitoService.createUser(faker.person.firstName(), faker.internet.email());
       const req: CreateUserProfileReq = {
         id: cognitoUser.id,
-        name: faker.person.firstName(),
-        email: faker.internet.email(),
+        name: cognitoUser.name,
+        email: cognitoUser.email,
       };
 
       // Act

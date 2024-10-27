@@ -18,14 +18,13 @@ export class UserController {
     } catch (error) {
       throw new UserErrors.ValidationError((error as unknown as ZodIssue).message, error as Error);
     }
+    
+    const cognitoUser = await this.cognitoService.getUserById(req.id);
+    if (!cognitoUser) {
+      throw new UserErrors.UserNotFoundError("User not found", new Error());
+    }
 
     try {
-      const cognitoUser = await this.cognitoService.getUserById(req.id);
-
-      if (!cognitoUser) {
-        throw new Error("User not found");
-      }
-
       const user = new User(
         cognitoUser.id,
         cognitoUser.name,

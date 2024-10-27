@@ -35,21 +35,21 @@ export const createProfileRoute = async (
       email: body?.email,
     });
 
-    return reply.status(201).send({
+    return reply.code(201).send({
       id: response.id,
       name: response.name,
       email: response.email,
     });
   } catch (error) {
     if (error instanceof UserErrors.ValidationError) {
-      return reply.status(422).send({
+      return reply.code(422).send({
         code: error.code,
         title: error.name,
         message: error.message,
       });
     }
     
-    return reply.status(500).send({
+    return reply.code(500).send({
       error: {
         code: INTERNAL_SERVER_ERROR,
         title: "Error",
@@ -64,6 +64,5 @@ export const getUserRoute = async (
   reply: FastifyReply
 ) => {
   const headers = request.headers;
-  console.log({ headers });
-  return reply.status(404).send("NOT FOUND");
+  return reply.code(404).send("NOT FOUND");
 };

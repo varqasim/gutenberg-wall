@@ -1,1 +1,1 @@
-export { default as GutenbergService } from "./GutenbergService";
+export { GutenbergService } from "./GutenbergService";
