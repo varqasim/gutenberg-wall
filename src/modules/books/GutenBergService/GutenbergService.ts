@@ -5,6 +5,8 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import type { AxiosInstance } from "axios";
 import * as cheerio from "cheerio";
+import { LibraryService } from "../LibraryService";
+import { GutenbergServiceErrors } from "./GutenbergServiceErrors";
 
 
 interface GutenBergBook {
@@ -37,13 +39,13 @@ export class GutenbergService {
       process.env.GUTENBERG_BASE_PATH ?? "https://gutenberg.org/";
   }
 
-  async getBook(bookId: string): Promise<GutenBergBook> {
+  async getBook(bookId: string): Promise<GutenBergBook | undefined> {
     try {
       const { headers } = await this.apiClient.head(
         `files/${bookId}/${bookId}-0.txt`
       );
 
-      let s3Key: string = this.createS3BookKey(bookId);
+      let s3Key: string = LibraryService.getS3BookKey(bookId);
       let promises = [];
       if (Number(headers["Content-Length"] ?? 0) >= this.FIVE_MB) {
         const response = await this.apiClient.get(
@@ -72,9 +74,11 @@ export class GutenbergService {
         imageUrl: imageUrl,
         releaseDate: formattedReleaseDate,
         url: uploadResponse as string,
-        
       };
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === "AxiosError" && error.status === 404) {
+        throw new GutenbergServiceErrors.BookNotFound("", error);
+      } 
       console.error(error);
       throw new Error("Error while getting book from Gutenberg");
     }
@@ -157,7 +161,7 @@ export class GutenbergService {
       });
 
       await this.s3Client.send(putObjectCommand);
-      return this.createS3Location(s3Key);
+      return LibraryService.createS3Location(s3Key);
     } catch (error) {
       console.error(error);
     }
@@ -189,22 +193,10 @@ export class GutenbergService {
       });
 
       await parallelUpload.done();
-      return this.createS3Location(s3Key);
+      return LibraryService.createS3Location(s3Key);
     } catch (error) {
       console.error(error);
     }
   }
 
-  private createS3BookKey(bookId: string) {
-    return `books/${bookId}/book.txt`;
-  }
-
-  private createS3ImageKey(bookId: string) {
-    return `books/${bookId}/image`;
-  }
-
-  private createS3Location(bookId: string) {
-    const key = this.createS3BookKey(bookId);
-    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-  }
 }

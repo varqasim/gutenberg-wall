@@ -17,8 +17,6 @@ export default class BookRepository {
       published_on: book.publishedOn,
       summary: book.summary,
     }
-
-    console.log({ bookModel })
     
     await db.insert(booksTable).values(bookModel);
   }
